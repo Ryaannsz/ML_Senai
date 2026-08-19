@@ -189,3 +189,5 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+# Relatorios regenerados pelo notebook de qualidade
+reports/profile_*.html
