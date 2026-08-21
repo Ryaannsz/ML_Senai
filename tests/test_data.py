@@ -1,5 +1,5 @@
-import pytest
+from module_olist.config import PROJ_ROOT
 
 
-def test_code_is_tested():
-    assert False
+def test_project_root_exists():
+    assert PROJ_ROOT.is_dir()
