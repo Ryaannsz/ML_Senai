@@ -5,6 +5,9 @@ from models.dataset import create_dataset, load_data, save_dataset
 from models.feature import create_features
 
 from module_olist.config import PROCESSED_DATA_DIR, RAW_DATA_DIR
+from module_olist.modeling.evaluate import evaluate_models
+from module_olist.modeling.split import split_data
+from module_olist.modeling.train import train_models
 
 
 def main(
@@ -14,7 +17,7 @@ def main(
     dataset_path: Path = PROCESSED_DATA_DIR / "dataset.csv",
     features_path: Path = PROCESSED_DATA_DIR / "features.csv",
 ) -> int:
-    """Executa a preparação dos dados brutos e a criação das features."""
+    """Executa a preparação dos dados, o treino e a avaliação dos modelos."""
     logger.info("Carregando dados brutos da Olist...")
     orders, items, customers = load_data(orders_path, items_path, customers_path)
 
@@ -24,7 +27,16 @@ def main(
     features = create_features(dataset)
     save_dataset(features, features_path)
 
-    logger.success("Pipeline concluído com sucesso.")
+    logger.info("Separando os dados de treino e teste...")
+    X_train, X_test, y_train, y_test = split_data(features)
+
+    logger.info("Treinando os modelos...")
+    models = train_models(X_train, y_train)
+
+    logger.info("Avaliando os modelos...")
+    evaluate_models(models, X_test, y_test)
+
+    logger.success("Pipeline de dados e modelagem concluído com sucesso.")
     return 0
 
 
