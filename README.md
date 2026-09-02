@@ -57,5 +57,25 @@ Brazilian e-commerce public dataset.
     └── plots.py                <- Code to create visualizations
 ```
 
+## Treinamento e validação
+
+O pipeline de modelagem usa uma divisão temporal: os 20% de pedidos mais
+recentes ficam reservados para o teste final. Nos 80% anteriores, cada modelo
+é avaliado com `TimeSeriesSplit` em cinco folds. O imputador e o encoder ficam
+dentro do `Pipeline`, portanto são ajustados novamente em cada fold.
+
+O threshold de classificação é escolhido a partir das previsões out-of-fold
+da validação cruzada. O conjunto de teste é usado somente uma vez para a
+avaliação final, sem reotimização do threshold.
+
+Para executar o fluxo completo:
+
+```bash
+make train
+```
+
+O projeto compara Gradient Boosting, XGBoost e LightGBM e registra ROC-AUC,
+precision, recall e F1 para a validação cruzada e para o teste temporal.
+
 --------
 

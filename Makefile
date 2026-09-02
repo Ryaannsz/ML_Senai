@@ -68,6 +68,12 @@ data: requirements
 	$(PYTHON_INTERPRETER) module_olist/dataset.py
 
 
+## Run the end-to-end data and modeling pipeline
+.PHONY: train
+train: requirements
+	$(PYTHON_INTERPRETER) -m module_olist.main
+
+
 #################################################################################
 # Self Documenting Commands                                                     #
 #################################################################################

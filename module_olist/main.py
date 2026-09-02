@@ -1,10 +1,10 @@
 from pathlib import Path
 
 from loguru import logger
-from models.dataset import create_dataset, load_data, save_dataset
-from models.feature import create_features
 
 from module_olist.config import PROCESSED_DATA_DIR, RAW_DATA_DIR
+from module_olist.dataset import create_dataset, load_data, save_dataset
+from module_olist.features import create_features
 from module_olist.modeling.evaluate import evaluate_models
 from module_olist.modeling.split import split_data
 from module_olist.modeling.train import train_models
@@ -27,14 +27,15 @@ def main(
     features = create_features(dataset)
     save_dataset(features, features_path)
 
-    logger.info("Separando os dados de treino e teste...")
-    X_train, X_test, y_train, y_test = split_data(features)
+    logger.info("Separando temporalmente os dados de treino e teste...")
+    X_train, X_test, y_train, y_test = split_data(features, strategy="temporal")
 
-    logger.info("Treinando os modelos...")
-    models = train_models(X_train, y_train)
+    logger.info("Treinando os modelos com validação cruzada temporal...")
+    models, cv_results, thresholds = train_models(X_train, y_train, n_splits=5)
+    logger.info("Resultados de validação cruzada:\n{}", cv_results.to_string(index=False))
 
-    logger.info("Avaliando os modelos...")
-    evaluate_models(models, X_test, y_test)
+    logger.info("Avaliando os modelos no período de teste intocado...")
+    evaluate_models(models, X_test, y_test, thresholds=thresholds)
 
     logger.success("Pipeline de dados e modelagem concluído com sucesso.")
     return 0

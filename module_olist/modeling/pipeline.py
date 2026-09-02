@@ -1,6 +1,7 @@
 from lightgbm import LGBMClassifier
 from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder
 from xgboost import XGBClassifier
@@ -27,11 +28,30 @@ def create_preprocessor() -> ColumnTransformer:
     """
     return ColumnTransformer(
         transformers=[
-            # Nas colunas numéricas
-            ("numeric", "passthrough", NUMERICAL_FEATURES),
-            # Nas colunas categóricas
-            ("categorical", OneHotEncoder(handle_unknown="ignore"), CATEGORICAL_FEATURES),
+            (
+                "numeric",
+                Pipeline([("imputer", SimpleImputer(strategy="median"))]),
+                NUMERICAL_FEATURES,
+            ),
+            (
+                "categorical",
+                Pipeline(
+                    [
+                        ("imputer", SimpleImputer(strategy="most_frequent")),
+                        (
+                            "onehot",
+                            OneHotEncoder(
+                                handle_unknown="ignore",
+                                sparse_output=False,
+                                dtype="float32",
+                            ),
+                        ),
+                    ]
+                ),
+                CATEGORICAL_FEATURES,
+            ),
         ],
+        remainder="drop",
     )
 
 
@@ -54,10 +74,13 @@ def create_xgboost_pipeline() -> Pipeline:
     preprocessor = create_preprocessor()
 
     model = XGBClassifier(
+        objective="binary:logistic",
+        eval_metric="logloss",
         n_estimators=100,  # números de árvores
         learning_rate=0.1,  # taxa de aprendizado
         max_depth=3,  # profundidade máxima das árvores
         random_state=42,  # semente para reprodutibilidade
+        n_jobs=1,
     )
 
     return Pipeline(steps=[("preprocessor", preprocessor), ("classifier", model)])
@@ -73,6 +96,7 @@ def create_lightgbm_pipeline() -> Pipeline:
         max_depth=3,  # profundidade máxima das árvores
         random_state=42,  # semente para reprodutibilidade
         verbosity=-1,
+        n_jobs=1,
     )
 
     return Pipeline(steps=[("preprocessor", preprocessor), ("classifier", model)])
