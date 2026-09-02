@@ -1,3 +1,7 @@
+import json
+from pathlib import Path
+
+import joblib
 from loguru import logger
 import numpy as np
 import pandas as pd
@@ -12,12 +16,77 @@ from module_olist.modeling.pipeline import (
     create_lightgbm_pipeline,
     create_xgboost_pipeline,
 )
+from module_olist.modeling.split import FEATURES, TARGET
 
 MODEL_FACTORIES = {
     "Gradient Boosting": create_gradient_boosting_pipeline,
     "XGBoost": create_xgboost_pipeline,
     "LightGBM": create_lightgbm_pipeline,
 }
+
+
+def select_best_model(
+    cv_results: pd.DataFrame,
+    *,
+    metric: str = "cv_f1",
+) -> str:
+    """Seleciona o modelo com melhor F1 após aplicar o threshold da CV."""
+    if metric not in cv_results.columns:
+        raise ValueError(f"Métrica de seleção ausente nos resultados: {metric}")
+    if cv_results.empty:
+        raise ValueError("Não há resultados de validação cruzada para selecionar um modelo.")
+    return str(cv_results.loc[cv_results[metric].idxmax(), "model"])
+
+
+def save_best_model(
+    models: dict[str, Pipeline],
+    cv_results: pd.DataFrame,
+    thresholds: dict[str, float],
+    *,
+    output_dir: Path,
+    X_final: pd.DataFrame | None = None,
+    y_final: pd.Series | None = None,
+    selection_metric: str = "cv_f1",
+) -> tuple[str, Path, Path]:
+    """Salva o melhor pipeline e os metadados necessários para inferência.
+
+    Quando X_final e y_final são informados, o modelo selecionado é reajustado
+    com todos os dados rotulados depois que o teste final já foi avaliado.
+    """
+    best_name = select_best_model(cv_results, metric=selection_metric)
+    if best_name not in models:
+        raise ValueError(f"Modelo selecionado não foi treinado: {best_name}")
+
+    model = models[best_name]
+    training_scope = "train_split"
+    if (X_final is None) != (y_final is None):
+        raise ValueError("X_final e y_final devem ser informados juntos.")
+    if X_final is not None and y_final is not None:
+        model = MODEL_FACTORIES[best_name]()
+        model.fit(X_final, y_final)
+        training_scope = "all_labeled_data_after_test_evaluation"
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    model_path = output_dir / "best_model.joblib"
+    metadata_path = output_dir / "best_model_metadata.json"
+    joblib.dump(model, model_path)
+
+    metadata = {
+        "model_name": best_name,
+        "selection_metric": selection_metric,
+        "threshold": thresholds[best_name],
+        "features": FEATURES,
+        "target": TARGET,
+        "training_scope": training_scope,
+        "cv_results": json.loads(cv_results.to_json(orient="records")),
+    }
+    metadata_path.write_text(
+        json.dumps(metadata, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+    logger.success("Melhor modelo salvo em {}", model_path)
+    logger.info("Metadados do modelo salvos em {}", metadata_path)
+    return best_name, model_path, metadata_path
 
 
 def cross_validate_models(

@@ -16,6 +16,7 @@ classifiers = [
     
 ]
 dependencies = [
+    "joblib",
     "ipython",
     "jupyterlab",
     "lightgbm>=4.7.0",

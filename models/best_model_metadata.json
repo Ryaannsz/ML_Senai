@@ -1,0 +1,50 @@
+{
+  "model_name": "XGBoost",
+  "selection_metric": "cv_f1",
+  "threshold": 0.07,
+  "features": [
+    "purchase_month",
+    "purchase_hour",
+    "purchase_weekday",
+    "promised_days",
+    "item_count",
+    "seller_count",
+    "total_price",
+    "total_freight",
+    "customer_state"
+  ],
+  "target": "is_late",
+  "training_scope": "all_labeled_data_after_test_evaluation",
+  "cv_results": [
+    {
+      "model": "Gradient Boosting",
+      "cv_roc_auc_mean": 0.6385589514,
+      "cv_roc_auc_std": 0.0295590194,
+      "oof_roc_auc": 0.6039037286,
+      "cv_threshold": 0.06,
+      "cv_precision": 0.1396658992,
+      "cv_recall": 0.4596163147,
+      "cv_f1": 0.2142320409
+    },
+    {
+      "model": "XGBoost",
+      "cv_roc_auc_mean": 0.6405009292,
+      "cv_roc_auc_std": 0.0285503473,
+      "oof_roc_auc": 0.6363366709,
+      "cv_threshold": 0.07,
+      "cv_precision": 0.171360255,
+      "cv_recall": 0.4159277769,
+      "cv_f1": 0.24272073
+    },
+    {
+      "model": "LightGBM",
+      "cv_roc_auc_mean": 0.6406043538,
+      "cv_roc_auc_std": 0.0268123254,
+      "oof_roc_auc": 0.636638653,
+      "cv_threshold": 0.07,
+      "cv_precision": 0.1677181208,
+      "cv_recall": 0.4028695792,
+      "cv_f1": 0.2368383642
+    }
+  ]
+}

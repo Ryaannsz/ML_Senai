@@ -3,6 +3,7 @@ import pandas as pd
 
 from module_olist.modeling.evaluate import evaluate_models, find_best_threshold
 from module_olist.modeling.split import FEATURES, split_data
+from module_olist.modeling.train import select_best_model
 
 
 def make_data(n_rows: int = 20) -> pd.DataFrame:
@@ -55,3 +56,15 @@ def test_evaluation_uses_the_threshold_received_from_cv() -> None:
     assert results.loc[0, "f1"] == 1.0
     assert results.loc[0, "accuracy"] == 1.0
     assert results.loc[0, "pr_auc"] == 1.0
+
+
+def test_select_best_model_uses_the_cv_metric() -> None:
+    cv_results = pd.DataFrame(
+        {
+            "model": ["XGBoost", "LightGBM"],
+            "cv_roc_auc_mean": [0.64, 0.61],
+            "cv_f1": [0.24, 0.27],
+        }
+    )
+
+    assert select_best_model(cv_results) == "LightGBM"

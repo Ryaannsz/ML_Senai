@@ -75,7 +75,19 @@ make train
 ```
 
 O projeto compara Gradient Boosting, XGBoost e LightGBM e registra ROC-AUC,
-precision, recall e F1 para a validação cruzada e para o teste temporal.
+precision, recall e F1 para a validação cruzada e para o teste temporal. O
+melhor modelo é selecionado pelo maior F1 calculado após a aplicação do
+threshold calibrado na validação cruzada.
+
+O melhor pipeline é salvo em `models/best_model.joblib`, e seu threshold e
+suas configurações ficam em `models/best_model_metadata.json`. Para gerar
+previsões depois do treinamento:
+
+```bash
+python -m module_olist.modeling.predict
+```
+
+As previsões são gravadas em `data/processed/predictions.csv`.
 
 --------
 

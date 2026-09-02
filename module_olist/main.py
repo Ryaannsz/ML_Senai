@@ -2,12 +2,12 @@ from pathlib import Path
 
 from loguru import logger
 
-from module_olist.config import PROCESSED_DATA_DIR, RAW_DATA_DIR
+from module_olist.config import MODELS_DIR, PROCESSED_DATA_DIR, RAW_DATA_DIR
 from module_olist.dataset import create_dataset, load_data, save_dataset
 from module_olist.features import create_features
 from module_olist.modeling.evaluate import evaluate_models
-from module_olist.modeling.split import split_data
-from module_olist.modeling.train import train_models
+from module_olist.modeling.split import FEATURES, split_data
+from module_olist.modeling.train import save_best_model, train_models
 
 
 def main(
@@ -36,6 +36,21 @@ def main(
 
     logger.info("Avaliando os modelos no período de teste intocado...")
     evaluate_models(models, X_test, y_test, thresholds=thresholds)
+
+    best_name, model_path, metadata_path = save_best_model(
+        models,
+        cv_results,
+        thresholds,
+        output_dir=MODELS_DIR,
+        X_final=features[FEATURES],
+        y_final=features["is_late"],
+    )
+    logger.success(
+        "Modelo selecionado pela CV: {} | pipeline: {} | metadados: {}",
+        best_name,
+        model_path,
+        metadata_path,
+    )
 
     logger.success("Pipeline de dados e modelagem concluído com sucesso.")
     return 0
