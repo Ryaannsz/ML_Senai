@@ -89,5 +89,14 @@ python -m module_olist.modeling.predict
 
 As previsões são gravadas em `data/processed/predictions.csv`.
 
+Para gerar explicações SHAP do XGBoost salvo:
+
+```bash
+python -m module_olist.explain
+```
+
+Os gráficos são salvos em `reports/figures/shap_feature_importance.png` e
+`reports/figures/shap_beeswarm.png`.
+
 --------
 

@@ -4,7 +4,7 @@
 
 PROJECT_NAME = olist
 PYTHON_VERSION = 3.13
-PYTHON_INTERPRETER = python
+PYTHON_INTERPRETER ?= .venv/bin/python
 
 #################################################################################
 # COMMANDS                                                                      #
@@ -72,6 +72,12 @@ data: requirements
 .PHONY: train
 train: requirements
 	$(PYTHON_INTERPRETER) -m module_olist.main
+
+
+## Generate SHAP explanations for the saved XGBoost model
+.PHONY: explain
+explain: requirements
+	$(PYTHON_INTERPRETER) -m module_olist.explain
 
 
 #################################################################################
