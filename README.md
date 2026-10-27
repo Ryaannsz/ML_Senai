@@ -100,3 +100,21 @@ Os gráficos são salvos em `reports/figures/shap_feature_importance.png` e
 
 --------
 
+
+
+## Notebooks das aulas
+
+1. `notebooks/01-data-prof.ipynb`: qualidade de orders, profiling e contrato de dados.
+2. `notebooks/02-analise-exploratoria.ipynb`: cinco hipóteses do material do professor.
+3. `notebooks/03-active-learning.ipynb`: consultas por incerteza com anotador simulado.
+
+Os dois primeiros adaptam os notebooks fornecidos pelo professor. O exemplo de
+active learning usa dados sintéticos porque não há exemplo dessa etapa entre os
+arquivos disponibilizados. O teste fica reservado e não participa das consultas.
+Execute `uv sync --locked` e `uv run jupyter lab` na raiz do projeto.
+Os CSVs Olist devem estar em `data/raw`; os relatórios HTML são regenerados.
+
+A avaliação mantém a separação temporal, métricas de precisão, recall, F1,
+ROC-AUC, PR-AUC e acurácia. O SHAP gera gráficos global, beeswarm e waterfall
+em `reports/figures`. As interfaces e nomes dos arquivos podem diferir do
+material da aula, preservando as etapas e o threshold escolhido na validação.
